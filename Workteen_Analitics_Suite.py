@@ -38,7 +38,7 @@ def header():
 
 @st.cache_data
 def cargar_datos():
-    conn = sqlite3.connect(r"D:\Proyectos\almacen_datos.db")
+    conn = sqlite3.connect("almacen_datos.db")
     df = pd.read_sql_query("SELECT * FROM ventas", conn)
     conn.close()
     df.columns = df.columns.str.strip()
