@@ -3,14 +3,12 @@ import pandas as pd
 import sqlite3
 import altair as alt
 
-#configuracion general#
-
+# CONFIGURACIÓN GENERAL
 st.set_page_config(page_title="Analytics Suite", layout="wide")
 
-LOGO_PATH = r"D:\Proyectos\Proyectos-main\Prandelli.png"
+LOGO_PATH = "Prandelli.png"   # Imagen debe estar en el repo
 
 # HEADER CORPORATIVO
-
 def header():
     col1, col2 = st.columns([1, 5])
 
@@ -18,7 +16,7 @@ def header():
         st.markdown(
             f"""
             <a href="https://prandelli.cl/" target="_blank">
-                <img src="file:///{LOGO_PATH}" width="90">
+                <img src="{LOGO_PATH}" width="90">
             </a>
             """,
             unsafe_allow_html=True
@@ -33,12 +31,10 @@ def header():
             unsafe_allow_html=True
         )
 
-
 # UTILIDADES DE DATOS
-
 @st.cache_data
 def cargar_datos():
-    conn = sqlite3.connect("almacen_datos.db")
+    conn = sqlite3.connect("almacen_datos.db")  # BD en la raíz del repo
     df = pd.read_sql_query("SELECT * FROM ventas", conn)
     conn.close()
     df.columns = df.columns.str.strip()
@@ -84,8 +80,7 @@ def unir_cluster(df_filtrado, pareto):
         how="left"
     )
 
-# FILTROS GLOBALES (INCLUYE CLUSTER ABC)
-
+# FILTROS GLOBALES
 def aplicar_filtros(df):
     st.sidebar.header("🔎 Filtros Globales")
 
@@ -119,7 +114,6 @@ def aplicar_filtros(df):
     return df_filtrado, pareto, df_cluster
 
 # PÁGINA: DASHBOARD COMERCIAL
-
 def pagina_dashboard(df):
     st.title("📊 Dashboard Comercial")
 
@@ -224,7 +218,6 @@ def pagina_dashboard(df):
     )
 
 # PÁGINA: PARETO ABC
-
 def pagina_pareto(df, pareto):
     st.title("📊 Pareto de Clientes + Clustering ABC")
 
@@ -245,7 +238,9 @@ def pagina_pareto(df, pareto):
         y=alt.Y("Porcentaje Acumulado:Q", axis=alt.Axis(format="~s"))
     )
 
-    st.altair_chart(alt.layer(bars, line), width="stretch")
+    chart = alt.layer(bars, line).properties(width="container", height=500)
+
+    st.altair_chart(chart, use_container_width=True)
 
     st.dataframe(
         pareto.style.format({
@@ -256,7 +251,6 @@ def pagina_pareto(df, pareto):
     )
 
 # PÁGINA: EVOLUCIÓN ABC
-
 def pagina_evolucion(df_cluster, pareto):
     st.title("📆 Evolución Mensual por Cluster ABC")
 
@@ -280,12 +274,11 @@ def pagina_evolucion(df_cluster, pareto):
         y=alt.Y("Monto Neto:Q", axis=alt.Axis(format="~s")),
         color="Cluster:N",
         tooltip=["Año", "MesNum", "Cluster", "Monto Neto"]
-    )
+    ).properties(width="container", height=500)
 
     st.altair_chart(chart, use_container_width=True)
 
 # PÁGINA: COMPARATIVA ABC
-
 def pagina_comparativa(df_cluster, pareto):
     st.title("📊 Comparativa Año vs Año Anterior por Cluster ABC")
 
@@ -314,15 +307,12 @@ def pagina_comparativa(df_cluster, pareto):
         y=alt.Y("Monto Neto:Q", axis=alt.Axis(format="~s")),
         color="Año:N",
         column="Año:N"
-    )
+    ).properties(width="container", height=500)
 
     st.altair_chart(chart, use_container_width=True)
 
-# PÁGINA: HEATMAP ABC
-
+# PÁGINA: HEATMAP ABC (CORREGIDA)
 def pagina_heatmap(df_cluster, pareto):
-    import pandas as pd
-
     st.title("🔥 Heatmap Vendedor × Cluster ABC")
 
     if df_cluster.empty:
@@ -335,6 +325,11 @@ def pagina_heatmap(df_cluster, pareto):
         .reset_index()
     )
 
+    # Asegurar tipos correctos
+    heat["Monto Neto"] = pd.to_numeric(heat["Monto Neto"], errors="coerce")
+    heat["Cluster"] = heat["Cluster"].astype(str)
+    heat["Vendedor"] = heat["Vendedor"].astype(str)
+
     orden_vendedores = (
         df_cluster.groupby("Vendedor")["Monto Neto"]
         .sum()
@@ -342,19 +337,27 @@ def pagina_heatmap(df_cluster, pareto):
         .index
     )
 
-    heat["Vendedor"] = pd.Categorical(heat["Vendedor"], categories=orden_vendedores, ordered=True)
+    heat["Vendedor"] = pd.Categorical(
+        heat["Vendedor"],
+        categories=orden_vendedores,
+        ordered=True
+    )
 
-    chart = alt.Chart(heat).mark_rect().encode(
-        x="Cluster:N",
-        y=alt.Y("Vendedor:N", sort=orden_vendedores),
-        color=alt.Color("Monto Neto:Q", scale=alt.Scale(scheme="reds")),
-        tooltip=["Vendedor", "Cluster", "Monto Neto"]
+    chart = (
+        alt.Chart(heat)
+        .mark_rect()
+        .encode(
+            x=alt.X("Cluster:N", title="Cluster"),
+            y=alt.Y("Vendedor:N", sort=orden_vendedores, title="Vendedor"),
+            color=alt.Color("Monto Neto:Q", scale=alt.Scale(scheme="reds")),
+            tooltip=["Vendedor", "Cluster", "Monto Neto"]
+        )
+        .properties(width="container", height=500)
     )
 
     st.altair_chart(chart, use_container_width=True)
 
 # PÁGINA: RIESGO COMERCIAL
-
 def pagina_riesgo(df_cluster, pareto):
     st.title("⚠️ Matriz de Riesgo Comercial")
 
@@ -385,7 +388,6 @@ def pagina_riesgo(df_cluster, pareto):
         st.success("🟢 Riesgo Bajo: Distribución equilibrada.")
 
 # MAIN
-
 def main():
     header()
 
