@@ -117,7 +117,7 @@ def aplicar_filtros(df):
 def fix_chart(chart):
     return (
         chart
-        .properties(width="container", height=500)
+        .properties(width=800, height=500)  # ancho numérico, válido en Altair v4
         .configure_view(stroke=None)
     )
 
