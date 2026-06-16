@@ -325,7 +325,6 @@ def pagina_heatmap(df_cluster, pareto):
         .reset_index()
     )
 
-    # Asegurar tipos correctos
     heat["Monto Neto"] = pd.to_numeric(heat["Monto Neto"], errors="coerce")
     heat["Cluster"] = heat["Cluster"].astype(str)
     heat["Vendedor"] = heat["Vendedor"].astype(str)
@@ -353,10 +352,11 @@ def pagina_heatmap(df_cluster, pareto):
             tooltip=["Vendedor", "Cluster", "Monto Neto"]
         )
         .properties(width="container", height=500)
+        .configure_view(stroke=None)
     )
 
-    st.altair_chart(chart, use_container_width=True)
-
+    st.altair_chart(chart, width="stretch")
+    
 # PÁGINA: RIESGO COMERCIAL
 def pagina_riesgo(df_cluster, pareto):
     st.title("⚠️ Matriz de Riesgo Comercial")
