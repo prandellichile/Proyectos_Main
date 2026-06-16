@@ -113,6 +113,14 @@ def aplicar_filtros(df):
 
     return df_filtrado, pareto, df_cluster
 
+# FUNCIÓN AUXILIAR PARA ALTair 5 + Streamlit 1.58
+def fix_chart(chart):
+    return (
+        chart
+        .properties(width="container", height=500)
+        .configure_view(stroke=None)
+    )
+
 # PÁGINA: DASHBOARD COMERCIAL
 def pagina_dashboard(df):
     st.title("📊 Dashboard Comercial")
@@ -238,9 +246,9 @@ def pagina_pareto(df, pareto):
         y=alt.Y("Porcentaje Acumulado:Q", axis=alt.Axis(format="~s"))
     )
 
-    chart = alt.layer(bars, line).properties(width="container", height=500)
+    chart = fix_chart(alt.layer(bars, line))
 
-    st.altair_chart(chart, use_container_width=True)
+    st.altair_chart(chart, width="stretch")
 
     st.dataframe(
         pareto.style.format({
@@ -274,9 +282,11 @@ def pagina_evolucion(df_cluster, pareto):
         y=alt.Y("Monto Neto:Q", axis=alt.Axis(format="~s")),
         color="Cluster:N",
         tooltip=["Año", "MesNum", "Cluster", "Monto Neto"]
-    ).properties(width="container", height=500)
+    )
 
-    st.altair_chart(chart, use_container_width=True)
+    chart = fix_chart(chart)
+
+    st.altair_chart(chart, width="stretch")
 
 # PÁGINA: COMPARATIVA ABC
 def pagina_comparativa(df_cluster, pareto):
@@ -307,9 +317,11 @@ def pagina_comparativa(df_cluster, pareto):
         y=alt.Y("Monto Neto:Q", axis=alt.Axis(format="~s")),
         color="Año:N",
         column="Año:N"
-    ).properties(width="container", height=500)
+    )
 
-    st.altair_chart(chart, use_container_width=True)
+    chart = fix_chart(chart)
+
+    st.altair_chart(chart, width="stretch")
 
 # PÁGINA: HEATMAP ABC (CORREGIDA)
 def pagina_heatmap(df_cluster, pareto):
@@ -351,12 +363,12 @@ def pagina_heatmap(df_cluster, pareto):
             color=alt.Color("Monto Neto:Q", scale=alt.Scale(scheme="reds")),
             tooltip=["Vendedor", "Cluster", "Monto Neto"]
         )
-        .properties(width="container", height=500)
-        .configure_view(stroke=None)
     )
 
+    chart = fix_chart(chart)
+
     st.altair_chart(chart, width="stretch")
-    
+
 # PÁGINA: RIESGO COMERCIAL
 def pagina_riesgo(df_cluster, pareto):
     st.title("⚠️ Matriz de Riesgo Comercial")
