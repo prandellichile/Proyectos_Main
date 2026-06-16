@@ -282,7 +282,7 @@ def pagina_evolucion(df_cluster, pareto):
         tooltip=["Año", "MesNum", "Cluster", "Monto Neto"]
     )
 
-    st.altair_chart(chart, width="stretch")
+    st.altair_chart(chart, use_container_width=True)
 
 # PÁGINA: COMPARATIVA ABC
 
