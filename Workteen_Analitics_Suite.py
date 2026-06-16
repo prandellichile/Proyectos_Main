@@ -316,7 +316,7 @@ def pagina_comparativa(df_cluster, pareto):
         column="Año:N"
     )
 
-    st.altair_chart(chart, width="stretch")
+    st.altair_chart(chart, use_container_width=True)
 
 # PÁGINA: HEATMAP ABC
 
@@ -351,7 +351,7 @@ def pagina_heatmap(df_cluster, pareto):
         tooltip=["Vendedor", "Cluster", "Monto Neto"]
     )
 
-    st.altair_chart(chart, width="stretch")
+    st.altair_chart(chart, use_container_width=True)
 
 # PÁGINA: RIESGO COMERCIAL
 
